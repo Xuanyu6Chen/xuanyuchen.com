@@ -1,0 +1,57 @@
+---
+// The bar at the top: the name, the Work | Notes switch, search, and the light/dark button.
+import { site } from '../../site.config';
+
+const tabs = [
+  { id: 'work', name: 'Work', href: '/' },
+  { id: 'notes', name: 'Notes', href: '/posts/' },
+];
+
+// A piece of work belongs to Work; a note belongs to Notes
+const path = Astro.url.pathname;
+const active = path.startsWith('/posts')
+  ? 'notes'
+  : path === '/' || path.startsWith('/projects')
+    ? 'work'
+    : '';
+---
+
+<header class="topbar">
+  <a class="brand" href="/">{site.name}</a>
+  <div class="topbar-r">
+    <nav class="tabs" aria-label="Main">
+      {
+        tabs.map((tab) => (
+          <a
+            href={tab.href}
+            class:list={['tab', { on: tab.id === active }]}
+            aria-current={tab.id === active ? 'page' : undefined}
+          >
+            {tab.id === active && <span class="tab-pill" aria-hidden="true" />}
+            {/* named so the label is drawn above the pill while the pill slides under it */}
+            <span class="tab-t" style={`view-transition-name: tab-${tab.id}`}>
+              {tab.name}
+            </span>
+          </a>
+        ))
+      }
+    </nav>
+
+    <button class="icon-btn" type="button" data-open-search aria-label="Search">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <line x1="15.5" y1="15.5" x2="20.5" y2="20.5"></line>
+      </svg>
+    </button>
+
+    <button class="icon-btn" type="button" data-toggle-theme aria-label="Switch between light and dark">
+      <svg class="sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path>
+      </svg>
+      <svg class="moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path>
+      </svg>
+    </button>
+  </div>
+</header>

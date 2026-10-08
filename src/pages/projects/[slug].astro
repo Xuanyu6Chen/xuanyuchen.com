@@ -1,0 +1,65 @@
+---
+// One piece of work, opened. Its picture is the same element as its tile on the Work page,
+// so the tile grows into this page and shrinks back.
+import { render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import WorkPicture from '../../components/WorkPicture.astro';
+import { site } from '../../../site.config';
+import { getWork, kindOf, type Piece } from '../../lib/content';
+
+// Only the pieces named in site.config.ts get a page. A file in content/work that is not
+// named there is not published at all.
+export async function getStaticPaths() {
+  const pieces = await getWork();
+  return pieces.map((piece) => ({ params: { slug: piece.entry.id }, props: piece }));
+}
+
+type Props = Piece;
+
+const { item, entry } = Astro.props;
+const { Content } = await render(entry);
+const hasBody = (entry.body ?? '').trim().length > 0;
+
+// A "website" link that only points back at this site is not worth showing
+const website =
+  entry.data.link && new URL(entry.data.link).hostname !== new URL(site.url).hostname
+    ? entry.data.link
+    : undefined;
+---
+
+<Page title={entry.data.title} description={entry.data.description}>
+  <a class="back" href="/"><span aria-hidden="true">&larr;</span> Back to work</a>
+  <WorkPicture item={item} fallback={entry.data.description} class="d-hero" />
+
+  <div class="d-head" data-rv>
+    <h1>{entry.data.title}</h1>
+    {kindOf(entry) && <span class="type">{kindOf(entry)}</span>}
+  </div>
+
+  <div class="d-body" data-rv>
+    <p class="lead">{entry.data.description}</p>
+    {
+      (website || entry.data.github) && (
+        <p class="d-links">
+          {website && (
+            <a href={website} target="_blank" rel="noopener noreferrer">
+              Website &nearr;
+            </a>
+          )}
+          {entry.data.github && (
+            <a href={entry.data.github} target="_blank" rel="noopener noreferrer">
+              GitHub &nearr;
+            </a>
+          )}
+        </p>
+      )
+    }
+    {
+      hasBody && (
+        <div class="prose">
+          <Content />
+        </div>
+      )
+    }
+  </div>
+</Page>

@@ -1,0 +1,1184 @@
+/* The whole look of the site, top to bottom in the order things appear on a page.
+   Black and white only; dark mode is the same design with the two swapped. */
+
+:root {
+  --bg: #ffffff;
+  --fg: #0a0a0a;
+  --muted: #737373;
+  --line: #e5e5e5;
+  --card: #f5f5f5;
+  --dot: #d4d4d4;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --r: 26px;
+  --sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+.dark {
+  --bg: #0a0a0a;
+  --fg: #fafafa;
+  --muted: #a3a3a3;
+  --line: #2a2a2a;
+  --card: #171717;
+  --dot: #404040;
+  color-scheme: dark;
+}
+
+/* ---------- Basics ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+blockquote {
+  margin: 0;
+}
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: inherit;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+/* Small grey labels in the code typeface: dates, counts, kinds */
+.meta,
+.num,
+.type {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.type {
+  white-space: nowrap;
+  background: var(--card);
+  padding: 3px 10px;
+  border-radius: 999px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+/* Underline that draws itself on hover */
+.ul {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat;
+  transition: background-size 0.5s var(--ease);
+  padding-bottom: 3px;
+}
+.tile:hover .ul,
+.topic-h:hover .ul,
+.rowl:hover .ul {
+  background-size: 100% 1.5px;
+}
+/* A larger grey sentence under a title */
+.lead {
+  margin-top: 16px;
+  font-size: clamp(18px, 2vw, 21px);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---------- Page frame ---------- */
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+/* Thin bar at the very top that follows how far down the page you are */
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--fg);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 60;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+}
+.brand {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.topbar-r {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Work | Notes: the white pill sits under the current tab and slides to the other one */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-right: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 14px;
+}
+.tab {
+  position: relative;
+  padding: 6px 16px;
+  border-radius: 999px;
+  color: var(--muted);
+  transition:
+    color 0.3s,
+    scale 0.15s;
+}
+.tab:hover,
+.tab.on {
+  color: var(--fg);
+}
+.tab:active {
+  scale: 0.95;
+}
+.tab-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+.tab-t {
+  position: relative;
+  display: inline-block;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--muted);
+  transition:
+    background-color 0.25s,
+    color 0.25s,
+    scale 0.15s;
+}
+.icon-btn:hover {
+  background: var(--card);
+  color: var(--fg);
+}
+.icon-btn:active {
+  scale: 0.92;
+}
+/* the light/dark button shows a sun in light mode and a moon in dark mode */
+.moon,
+.dark .sun {
+  display: none;
+}
+.dark .moon {
+  display: block;
+}
+
+/* The name. It sits outside the part that changes, so it stays put between Work and Notes. */
+.hero {
+  padding: clamp(40px, 8vw, 104px) 0 clamp(36px, 6vw, 72px);
+}
+.hero h1 {
+  font-size: clamp(46px, 8vw, 112px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.tagline {
+  margin-top: 24px;
+  font-size: clamp(17px, 2vw, 22px);
+  color: var(--muted);
+}
+
+/* Everything below the name. Pages without the name get their own top spacing. */
+#views {
+  background: var(--bg);
+  min-height: 60vh;
+}
+#views.plain {
+  padding-top: clamp(28px, 5vw, 56px);
+}
+.sec {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.sec h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: clamp(56px, 8vw, 96px);
+  padding: 22px 0 40px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+.foot-l {
+  display: flex;
+  gap: 20px;
+}
+.foot a {
+  transition: color 0.25s;
+}
+.foot a:hover {
+  color: var(--fg);
+}
+
+/* Things rise in as they enter the screen. Without JavaScript they are simply visible. */
+html.js [data-rv] {
+  opacity: 0;
+}
+html.js [data-rv].in {
+  opacity: 1;
+}
+
+/* ---------- Work: the gallery ---------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.tile {
+  display: block;
+}
+.art {
+  height: clamp(240px, 34vw, 400px);
+  border-radius: var(--r);
+  position: relative;
+  overflow: hidden;
+  background: var(--card);
+  outline: 1px solid transparent;
+  transition:
+    transform 0.45s var(--ease),
+    box-shadow 0.45s var(--ease),
+    scale 0.18s;
+}
+.tile:hover .art {
+  transform: translateY(-8px) scale(1.012);
+  box-shadow: 0 34px 60px -34px rgb(0 0 0 / 0.45);
+}
+.tile:active .art {
+  scale: 0.985;
+}
+/* a line of type on a dark card */
+.art-text {
+  background: var(--fg);
+  color: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(18px, 3vw, 32px);
+}
+.art-text small {
+  font-family: var(--mono);
+  font-size: 12px;
+  opacity: 0.8;
+}
+.art-text b {
+  display: block;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-size: clamp(26px, 3.7vw, 50px);
+  line-height: 1.02;
+}
+/* a row of labelled steps on dotted paper */
+.art-fig {
+  display: grid;
+  place-items: center;
+  padding: 6%;
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.pipe {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.pipe .pl {
+  stroke: var(--dot);
+  stroke-width: 2;
+  fill: none;
+}
+.pipe rect {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+.pipe rect.hot {
+  fill: var(--fg);
+}
+.pipe text {
+  font-family: var(--mono);
+  font-size: 10px;
+  fill: var(--muted);
+  text-anchor: middle;
+}
+.cap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 14px;
+}
+.name {
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.1;
+}
+
+/* ---------- One piece of work, opened ---------- */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 10px 0;
+  margin-bottom: 14px;
+  transition:
+    scale 0.15s,
+    gap 0.3s var(--ease);
+}
+.back:hover {
+  gap: 14px;
+}
+.back:active {
+  scale: 0.95;
+}
+.d-hero {
+  height: clamp(260px, 42vw, 480px);
+}
+.d-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 24px;
+}
+.d-head h1 {
+  font-size: clamp(34px, 5vw, 64px);
+  letter-spacing: -0.04em;
+}
+.d-body {
+  max-width: 68ch;
+}
+.d-links {
+  display: flex;
+  gap: 18px;
+  margin-top: 16px;
+  font-size: 15px;
+}
+.d-links a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.d-body .prose {
+  margin-top: 28px;
+}
+
+/* ---------- Notes ---------- */
+/* Notes can be arranged two ways. <html data-nv="topic|date"> says which one shows;
+   it is set from the saved choice before the page paints (see Page.astro). */
+.seg {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-self: center;
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 13px;
+}
+.seg-b {
+  position: relative;
+  z-index: 1;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--muted);
+  white-space: nowrap;
+  transition:
+    color 0.3s,
+    scale 0.15s;
+}
+.seg-b:hover {
+  color: var(--fg);
+}
+.seg-b:active {
+  scale: 0.95;
+}
+.seg-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  transition: translate 0.45s var(--ease);
+}
+html[data-nv='date'] .seg-pill {
+  translate: 100% 0;
+}
+html:not([data-nv='date']) .seg-b[data-nv='topic'],
+html[data-nv='date'] .seg-b[data-nv='date'] {
+  color: var(--fg);
+}
+.dates {
+  display: none;
+}
+html[data-nv='date'] .dates {
+  display: block;
+}
+html[data-nv='date'] .topics {
+  display: none;
+}
+
+/* By topic: one card per topic; click it and it unfolds */
+.topics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.topic {
+  background: var(--card);
+  border-radius: var(--r);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s var(--ease),
+    background-color 0.3s,
+    color 0.3s;
+}
+/* black under the pointer, and it stays black while open */
+.topic:hover,
+.topic.open {
+  background: var(--fg);
+  color: var(--bg);
+}
+.topic:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 50px -30px rgb(0 0 0 / 0.4);
+}
+.topic .type,
+.rowl .type {
+  background: var(--bg);
+}
+.topic .type {
+  align-self: flex-start;
+}
+.topic:hover .type,
+.topic.open .type,
+.rowl:hover .type {
+  background: color-mix(in srgb, var(--bg) 16%, transparent);
+  color: inherit;
+}
+.topic-h {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  min-height: 170px;
+  padding: 22px;
+  transition: scale 0.15s;
+}
+.topic-h:active {
+  scale: 0.98;
+}
+.topic .name {
+  font-size: clamp(22px, 2.4vw, 28px);
+}
+.topic .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.go {
+  font-family: var(--mono);
+  font-size: 22px;
+  line-height: 1;
+  transition: rotate 0.45s var(--ease);
+}
+.topic.open .go {
+  rotate: 135deg;
+}
+.fold {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease);
+}
+.topic.open .fold {
+  grid-template-rows: 1fr;
+}
+.fold ul {
+  overflow: hidden;
+  min-height: 0;
+  padding: 0 22px;
+}
+.fold li {
+  border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  font-size: 15px;
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 0.4s,
+    translate 0.4s var(--ease);
+}
+.fold li > * {
+  display: block;
+  padding: 11px 0;
+}
+.fold li:last-child > * {
+  padding-bottom: 20px;
+}
+.fold li a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.topic.open .fold li {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: calc(var(--i) * 70ms + 140ms);
+}
+.topic.open .fold li.dim {
+  opacity: 0.55;
+}
+
+/* By date: one list, newest first; a row turns black under the pointer, like a topic card */
+.yr + .yr {
+  margin-top: 28px;
+}
+.yr-h {
+  margin: 0 0 10px 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.rows {
+  background: var(--card);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.rows li + li {
+  border-top: 1px solid color-mix(in srgb, var(--fg) 7%, transparent);
+}
+.rowl {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+.rowl:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+.row-d {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+.rowl:hover .row-d {
+  color: inherit;
+  opacity: 0.7;
+}
+.row-t {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: clamp(17px, 1.7vw, 20px);
+  line-height: 1.25;
+}
+
+/* ---------- One note ---------- */
+.note {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 56px;
+}
+.note-head h1 {
+  margin-top: 14px;
+  font-size: clamp(32px, 4.6vw, 54px);
+  letter-spacing: -0.04em;
+}
+/* "LLM fine-tuning · part 2 of 3" and the list of parts */
+.in-topic {
+  margin-top: 32px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: var(--card);
+}
+.in-topic ol {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  counter-reset: part;
+}
+.in-topic li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  counter-increment: part;
+  font-size: 15px;
+  color: var(--muted);
+}
+.in-topic li::before {
+  content: counter(part);
+  padding-top: 3px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.in-topic [aria-current] {
+  color: var(--fg);
+  font-weight: 600;
+}
+.in-topic a:hover {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* Previous and next note in the same topic */
+.next-prev {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 56px;
+}
+.next-prev a {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: var(--card);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+.next-prev a:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+.next-prev a:hover .meta {
+  color: inherit;
+  opacity: 0.7;
+}
+.next-prev .next {
+  text-align: right;
+}
+.next-prev b {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+/* "On this page": only on wide screens, and it follows you down the note */
+.toc {
+  display: none;
+}
+.toc ul {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--line);
+}
+.toc a {
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.toc a:hover,
+.toc a.on {
+  color: var(--fg);
+}
+.toc .sub {
+  padding-left: 12px;
+}
+@media (min-width: 1000px) {
+  .note {
+    grid-template-columns: minmax(0, 68ch) 220px;
+    justify-content: space-between;
+  }
+  .toc {
+    display: block;
+    position: sticky;
+    top: 96px;
+    align-self: start;
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+  }
+}
+
+/* The text of a note or a work page, as written in Markdown */
+.prose {
+  margin-top: 40px;
+  font-size: 17px;
+  line-height: 1.75;
+}
+.prose > * + * {
+  margin-top: 1.25em;
+}
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 96px;
+}
+.prose h2 {
+  margin-top: 2.2em;
+  font-size: 1.6em;
+  letter-spacing: -0.03em;
+}
+.prose h3 {
+  margin-top: 1.8em;
+  font-size: 1.25em;
+}
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose li + li {
+  margin-top: 0.4em;
+}
+.prose li::marker {
+  color: var(--muted);
+}
+.prose blockquote {
+  padding-left: 1em;
+  border-left: 2px solid var(--line);
+  color: var(--muted);
+}
+.prose hr {
+  margin: 2.4em 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.prose img {
+  height: auto;
+  margin-inline: auto;
+  border-radius: 14px;
+}
+/* A line of italics straight after a picture is its caption: "Fig. 1: ..." */
+.prose img + em {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-style: normal;
+  font-size: 13px;
+  color: var(--muted);
+}
+/* Wide tables scroll sideways instead of breaking the page */
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.prose th,
+.prose td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.prose th {
+  font-weight: 600;
+}
+.prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+.prose code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--card);
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+/* Code blocks scroll sideways too; a long line is never broken mid-word */
+.prose pre {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.prose pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+/* Code carries both colour sets; show the one that matches the theme */
+.astro-code {
+  background-color: var(--shiki-light-bg);
+}
+.astro-code span {
+  color: var(--shiki-light);
+}
+.dark .astro-code {
+  background-color: var(--shiki-dark-bg);
+}
+.dark .astro-code span {
+  color: var(--shiki-dark);
+}
+
+/* ---------- Search ---------- */
+.search {
+  width: min(620px, calc(100vw - 32px));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.45);
+  overflow: hidden;
+}
+.search::backdrop {
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(6px);
+}
+.search[open] {
+  animation: 0.25s var(--ease) both search-in;
+}
+@keyframes search-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  color: var(--muted);
+}
+.search-box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 17px;
+}
+.search-box input::-webkit-search-cancel-button {
+  display: none;
+}
+kbd {
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: var(--card);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.search-list {
+  max-height: min(52vh, 420px);
+  overflow: auto;
+  border-top: 1px solid var(--line);
+}
+.search-list:empty {
+  display: none;
+}
+.search-list a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding: 14px 20px;
+}
+.search-list a.on {
+  background: var(--fg);
+  color: var(--bg);
+}
+.search-list b {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.search-list small {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.search-list a.on small {
+  color: inherit;
+  opacity: 0.7;
+}
+.search-list a.on .type {
+  background: color-mix(in srgb, var(--bg) 16%, transparent);
+  color: inherit;
+}
+.search-empty {
+  padding: 18px 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* ---------- Page not found ---------- */
+.lost {
+  padding: clamp(40px, 8vw, 96px) 0;
+}
+.lost h1 {
+  font-size: clamp(40px, 7vw, 88px);
+  letter-spacing: -0.04em;
+}
+
+/* ---------- Page transitions ----------
+   Astro writes the kind of navigation on <html> as data-astro-transition.
+   src/scripts/site.ts sets it to tab-fwd, tab-back, open or close; anything else is a plain page change. */
+#views {
+  view-transition-name: page;
+}
+.tab-pill {
+  view-transition-name: nav-pill;
+}
+/* O1: while a piece of work opens or closes, its tile and the opened page's picture are one element */
+html[data-astro-transition='open'] .tile[data-vt] .art,
+html[data-astro-transition='close'] .tile[data-vt] .art,
+html[data-astro-transition='open'] .d-hero,
+html[data-astro-transition='close'] .d-hero {
+  view-transition-name: work-art;
+}
+::view-transition-group(work-art) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.1, 1);
+}
+::view-transition-old(work-art),
+::view-transition-new(work-art) {
+  height: 100%;
+  object-fit: cover;
+  overflow: clip;
+}
+::view-transition-group(nav-pill) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+::view-transition-group(page) {
+  animation-duration: 0.45s;
+}
+/* plain page change: the next page fades up */
+::view-transition-old(page) {
+  animation: 0.22s ease both vt-fade-out;
+}
+::view-transition-new(page) {
+  animation: 0.45s cubic-bezier(0.2, 0.7, 0.1, 1) 0.08s both vt-fade-up;
+}
+/* T1: Work and Notes slide sideways; the name above them does not move */
+html[data-astro-transition='tab-fwd']::view-transition-old(page) {
+  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out-left;
+}
+html[data-astro-transition='tab-fwd']::view-transition-new(page) {
+  animation: 0.5s cubic-bezier(0.2, 0.7, 0.1, 1) both vt-in-right;
+}
+html[data-astro-transition='tab-back']::view-transition-old(page) {
+  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out-right;
+}
+html[data-astro-transition='tab-back']::view-transition-new(page) {
+  animation: 0.5s cubic-bezier(0.2, 0.7, 0.1, 1) both vt-in-left;
+}
+/* O1: the rest of the page fades while the picture grows or shrinks */
+html[data-astro-transition='open']::view-transition-old(page),
+html[data-astro-transition='close']::view-transition-old(page) {
+  animation: 0.25s ease both vt-fade-out;
+}
+html[data-astro-transition='open']::view-transition-new(page),
+html[data-astro-transition='close']::view-transition-new(page) {
+  animation: 0.45s ease 0.18s both vt-fade-in;
+}
+/* Notes, by topic <-> by date: only the notes slide; the rest of the page holds still */
+html[data-nv-anim] .notes {
+  view-transition-name: notes;
+}
+html[data-nv-anim]::view-transition-old(page),
+html[data-nv-anim]::view-transition-new(page) {
+  animation: none;
+}
+html[data-nv-anim='fwd']::view-transition-old(notes) {
+  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out-left;
+}
+html[data-nv-anim='fwd']::view-transition-new(notes) {
+  animation: 0.5s cubic-bezier(0.2, 0.7, 0.1, 1) both vt-in-right;
+}
+html[data-nv-anim='back']::view-transition-old(notes) {
+  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out-right;
+}
+html[data-nv-anim='back']::view-transition-new(notes) {
+  animation: 0.5s cubic-bezier(0.2, 0.7, 0.1, 1) both vt-in-left;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes vt-out-left {
+  to {
+    transform: translateX(-70px);
+    opacity: 0;
+  }
+}
+@keyframes vt-in-right {
+  from {
+    transform: translateX(70px);
+    opacity: 0;
+  }
+}
+@keyframes vt-out-right {
+  to {
+    transform: translateX(70px);
+    opacity: 0;
+  }
+}
+@keyframes vt-in-left {
+  from {
+    transform: translateX(-70px);
+    opacity: 0;
+  }
+}
+
+/* Visitors who ask their system for less motion get none of it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  html.js [data-rv] {
+    opacity: 1;
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 860px) {
+  .topics {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .tiles,
+  .next-prev {
+    grid-template-columns: 1fr;
+  }
+  .next-prev .next {
+    text-align: left;
+  }
+  .tab {
+    padding: 6px 12px;
+  }
+  .rowl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .rowl .type {
+    justify-self: start;
+  }
+}

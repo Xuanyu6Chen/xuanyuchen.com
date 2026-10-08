@@ -1,0 +1,27 @@
+---
+// Work: the home page. A gallery of the pieces named in site.config.ts.
+import Page from '../layouts/Page.astro';
+import WorkPicture from '../components/WorkPicture.astro';
+import { getWork, kindOf, workUrl } from '../lib/content';
+
+const pieces = await getWork();
+---
+
+<Page name>
+  <div class="sec" data-rv><h2>Work</h2></div>
+  <div class="tiles">
+    {
+      pieces.map(({ item, entry }) => (
+        <a class="tile" href={workUrl(entry)} data-slug={entry.id} data-rv>
+          <WorkPicture item={item} fallback={entry.data.description} />
+          <div class="cap">
+            <span class="name">
+              <span class="ul">{entry.data.title}</span>
+            </span>
+            {kindOf(entry) && <span class="type">{kindOf(entry)}</span>}
+          </div>
+        </a>
+      ))
+    }
+  </div>
+</Page>

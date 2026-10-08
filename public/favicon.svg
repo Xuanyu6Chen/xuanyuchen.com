@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0a0a0a"/>
+  <!-- X and C drawn as lines, so the icon looks the same on every machine -->
+  <g fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round">
+    <path d="M11 22.5 25 41.5M25 22.5 11 41.5"/>
+    <path d="M51 26.15A9.5 9.5 0 1 0 51 37.85"/>
+  </g>
+</svg>

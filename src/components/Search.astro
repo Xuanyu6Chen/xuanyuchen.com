@@ -1,0 +1,17 @@
+---
+// The search box. It opens from the magnifier or with Cmd/Ctrl + K, and looks through
+// the titles and descriptions of every note and piece of work (see src/pages/search.json.ts).
+---
+
+<dialog class="search" aria-label="Search">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5"></circle>
+      <line x1="15.5" y1="15.5" x2="20.5" y2="20.5"></line>
+    </svg>
+    <input type="search" placeholder="Search notes and work" autocomplete="off" spellcheck="false" aria-label="Search notes and work" />
+    <kbd>esc</kbd>
+  </div>
+  <ul class="search-list"></ul>
+  <p class="search-empty" hidden>Nothing matches that.</p>
+</dialog>

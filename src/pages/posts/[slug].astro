@@ -1,0 +1,124 @@
+---
+// One note. Its address is its file name. Notes from before the rewrite also answer at
+// their old dated address, which forwards here.
+import { render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import Forward from '../../components/Forward.astro';
+import { site } from '../../../site.config';
+import {
+  datedName,
+  getNotes,
+  longDate,
+  minutesToRead,
+  notesIn,
+  noteUrl,
+  topicOf,
+  type Note,
+} from '../../lib/content';
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  const cutoff = new Date(site.datedAddressesBefore);
+  return [
+    ...notes.map((note) => ({ params: { slug: note.id }, props: { note, forward: false } })),
+    ...notes
+      .filter((note) => note.data.pubDate < cutoff)
+      .map((note) => ({ params: { slug: datedName(note) }, props: { note, forward: true } })),
+  ];
+}
+
+interface Props {
+  note: Note;
+  forward: boolean;
+}
+
+const { note, forward } = Astro.props;
+const { Content, headings } = await render(note);
+
+// Where this note sits in its topic
+const topic = topicOf(note);
+const siblings = topic ? notesIn(topic.id, await getNotes()) : [];
+const place = siblings.findIndex((n) => n.id === note.id);
+const before = place > 0 ? siblings[place - 1] : undefined;
+const after = place >= 0 && place < siblings.length - 1 ? siblings[place + 1] : undefined;
+
+const contents = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const meta = [longDate(note.data.pubDate), topic?.title, `${minutesToRead(note)} min read`].filter(Boolean);
+---
+
+{
+  forward ? (
+    <Forward to={noteUrl(note)} />
+  ) : (
+    <Page title={note.data.title} description={note.data.description} published={note.data.pubDate}>
+      <a class="back" href="/posts/">
+        <span aria-hidden="true">&larr;</span> Back to notes
+      </a>
+
+      <div class="note">
+        <article>
+          <header class="note-head">
+            <p class="meta">{meta.join(' · ')}</p>
+            <h1>{note.data.title}</h1>
+            <p class="lead">{note.data.description}</p>
+          </header>
+
+          {siblings.length > 1 && topic && (
+            <nav class="in-topic" aria-label={`Notes in ${topic.title}`}>
+              <p class="meta">
+                {topic.title} · part {place + 1} of {siblings.length}
+              </p>
+              <ol>
+                {siblings.map((n) => (
+                  <li>
+                    {n.id === note.id ? (
+                      <span aria-current="page">{n.data.title}</span>
+                    ) : (
+                      <a href={noteUrl(n)}>{n.data.title}</a>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+
+          <div class="prose">
+            <Content />
+          </div>
+
+          {(before || after) && (
+            <nav class="next-prev" aria-label="More in this topic">
+              {before ? (
+                <a href={noteUrl(before)}>
+                  <span class="meta">&larr; Previous</span>
+                  <b>{before.data.title}</b>
+                </a>
+              ) : (
+                <span />
+              )}
+              {after && (
+                <a class="next" href={noteUrl(after)}>
+                  <span class="meta">Next &rarr;</span>
+                  <b>{after.data.title}</b>
+                </a>
+              )}
+            </nav>
+          )}
+        </article>
+
+        {contents.length > 1 && (
+          <aside class="toc" aria-label="On this page">
+            <p class="meta">On this page</p>
+            <ul>
+              {contents.map((h) => (
+                <li class:list={[{ sub: h.depth === 3 }]}>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+      </div>
+    </Page>
+  )
+}

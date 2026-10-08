@@ -1,0 +1,108 @@
+---
+// The frame every page sits in: top bar, the name (on Work and Notes), the page itself, the footer.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/site.css';
+import { ClientRouter } from 'astro:transitions';
+import TopBar from '../components/TopBar.astro';
+import Name from '../components/Name.astro';
+import Search from '../components/Search.astro';
+import { site } from '../../site.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  name?: boolean; // show the large name above the page (Work and Notes)
+  published?: Date; // set on notes: marks the page as an article for search engines
+}
+
+const { title, description = site.description, name = false, published } = Astro.props;
+const pageTitle = title ? `${title} | ${site.name}` : site.name;
+const address = new URL(Astro.url.pathname, site.url).toString();
+const preview = new URL('/preview.png', site.url).toString();
+const missing = Astro.url.pathname.startsWith('/404'); // the "not found" page has no address of its own
+
+const article = published && {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  datePublished: published.toISOString(),
+  author: { '@type': 'Person', name: site.name, url: site.url },
+  mainEntityOfPage: address,
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {!missing && <link rel="canonical" href={address} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
+
+    <!-- What a link to this page looks like when shared -->
+    <meta property="og:title" content={pageTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content={published ? 'article' : 'website'} />
+    {!missing && <meta property="og:url" content={address} />}
+    <meta property="og:image" content={preview} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {article && <script type="application/ld+json" is:inline set:html={JSON.stringify(article)} />}
+
+    <!-- Runs before the page paints, so the theme and the saved Notes arrangement never flash.
+         Theme: the visitor's saved choice, otherwise whatever their system is set to. -->
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const restore = () => {
+          let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          let notes = 'topic';
+          try {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || saved === 'light') dark = saved === 'dark';
+            if (localStorage.getItem('notes-view') === 'date') notes = 'date';
+          } catch {
+            /* storage can be blocked; the defaults apply */
+          }
+          root.classList.add('js'); // lets the stylesheet hide things that will rise in
+          root.classList.toggle('dark', dark);
+          root.dataset.nv = notes;
+        };
+        restore();
+        document.addEventListener('astro:after-swap', restore);
+      })();
+    </script>
+
+    <ClientRouter fallback="swap" />
+  </head>
+  <body>
+    <div class="progress" aria-hidden="true"></div>
+    <div class="wrap">
+      <TopBar />
+      {name && <Name />}
+      <!-- Only this part changes between pages; the name above it stays where it is -->
+      <main id="views" class:list={[{ plain: !name }]}>
+        <slot />
+      </main>
+      <footer class="foot">
+        <span>&copy; {new Date().getFullYear()} {site.name}</span>
+        <div class="foot-l">
+          {
+            Object.entries(site.links).map(([label, url]) => (
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {label}
+              </a>
+            ))
+          }
+        </div>
+      </footer>
+    </div>
+    <Search />
+    <script>
+      import '../scripts/site.ts';
+    </script>
+  </body>
+</html>

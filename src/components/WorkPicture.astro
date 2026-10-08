@@ -1,0 +1,40 @@
+---
+// The picture for one piece of work. The same picture is its tile on the Work page and the
+// top of its own page, so one can grow into the other.
+import type { WorkItem } from '../../site.config';
+
+interface Props {
+  item: WorkItem;
+  fallback: string; // used as the large line when a text tile has no headline
+  class?: string;
+}
+
+const { item, fallback, class: extra } = Astro.props;
+const steps = item.steps ?? [];
+const width = 480;
+const edge = 40;
+const gap = steps.length > 1 ? (width - edge * 2) / (steps.length - 1) : 0;
+---
+
+{
+  item.tile === 'steps' && steps.length > 0 ? (
+    <div class:list={['art', 'art-fig', extra]}>
+      <svg class="pipe" viewBox={`0 0 ${width} 150`} role="img" aria-label={`Steps: ${steps.join(', ')}`}>
+        <path class="pl" d={`M${edge} 60 H${width - edge}`} />
+        {steps.map((step, i) => (
+          <g>
+            <rect class:list={[{ hot: step === item.current }]} x={edge + gap * i - 16} y="44" width="32" height="32" rx="5" />
+            <text x={edge + gap * i} y="104">
+              {step}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  ) : (
+    <div class:list={['art', 'art-text', extra]}>
+      <small>{item.kicker ?? ''}</small>
+      <b>{item.headline ?? fallback}</b>
+    </div>
+  )
+}

@@ -1,0 +1,10 @@
+---
+// The large name (and an optional line under it). It sits outside the part of the page that
+// changes between Work and Notes, which is why it stays still when you switch.
+import { site } from '../../site.config';
+---
+
+<header class="hero">
+  <h1>{site.name}</h1>
+  {site.tagline && <p class="tagline">{site.tagline}</p>}
+</header>

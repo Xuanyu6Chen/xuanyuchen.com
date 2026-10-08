@@ -1,0 +1,98 @@
+---
+// Notes: the same notes arranged two ways.
+// By topic: one card per topic; clicking a card unfolds its notes.
+// By date: one list, newest first.
+import Page from '../../layouts/Page.astro';
+import { topics, type Topic } from '../../../site.config';
+import { getNotes, notesIn, noteUrl, shortDate, topicOf, type Note } from '../../lib/content';
+
+const notes = await getNotes();
+
+// By topic
+const cards: (Topic & { notes: Note[] })[] = topics.map((topic) => ({
+  ...topic,
+  notes: notesIn(topic.id, notes),
+}));
+// A note that belongs to no listed topic still gets a home
+const loose = notes.filter((note) => !topicOf(note));
+if (loose.length > 0) cards.push({ id: 'other', title: 'Other notes', notes: loose });
+
+const count = (n: number) => `${n} ${n === 1 ? 'note' : 'notes'}`;
+
+// By date (getNotes already returns them newest first)
+const years = [...new Set(notes.map((note) => note.data.pubDate.getUTCFullYear()))];
+---
+
+<Page title="Notes" name>
+  <div class="sec" data-rv>
+    <h2>Notes</h2>
+    <div class="seg" role="group" aria-label="Arrange notes">
+      <span class="seg-pill" aria-hidden="true"></span>
+      <button class="seg-b" type="button" data-nv="topic" aria-pressed="true">By topic</button>
+      <button class="seg-b" type="button" data-nv="date" aria-pressed="false">By date</button>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="topics">
+      {
+        cards.map((card) => (
+          <div class="topic" data-rv>
+            <button class="topic-h" type="button" aria-expanded="false">
+              <span class="type">{card.label ?? count(card.notes.length)}</span>
+              <span class="row">
+                <span class="name">
+                  <span class="ul">{card.title}</span>
+                </span>
+                <span class="go" aria-hidden="true">
+                  +
+                </span>
+              </span>
+            </button>
+            <div class="fold" inert>
+              <ul>
+                {card.notes.map((note, i) => (
+                  <li style={`--i:${i}`}>
+                    <a href={noteUrl(note)}>{note.data.title}</a>
+                  </li>
+                ))}
+                {card.notes.length === 0 && (
+                  <li class="dim" style="--i:0">
+                    <span>{card.empty ?? 'Nothing here yet.'}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="dates">
+      {
+        years.map((year) => (
+          <section class="yr" data-rv>
+            <h3 class="yr-h">{year}</h3>
+            <ul class="rows">
+              {notes
+                .filter((note) => note.data.pubDate.getUTCFullYear() === year)
+                .map((note) => (
+                  <li>
+                    <a class="rowl" href={noteUrl(note)}>
+                      <time class="row-d" datetime={note.data.pubDate.toISOString()}>
+                        {shortDate(note.data.pubDate)}
+                      </time>
+                      <span class="row-t">
+                        <span class="ul">{note.data.title}</span>
+                      </span>
+                      {topicOf(note) && <span class="type">{topicOf(note)?.title}</span>}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Page>

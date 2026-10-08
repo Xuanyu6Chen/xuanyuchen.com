@@ -1,0 +1,12 @@
+# installed packages, build output, generated types: all regenerable
+node_modules/
+dist/
+.astro/
+
+# local settings and logs
+.env
+.env.*
+npm-debug.log*
+
+# macOS
+.DS_Store
