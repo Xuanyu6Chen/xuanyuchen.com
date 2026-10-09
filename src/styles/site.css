@@ -8,6 +8,7 @@
   --line: #e5e5e5;
   --card: #f5f5f5;
   --dot: #d4d4d4;
+  --marker: #ffe566;
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
   --r: 26px;
   --sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
@@ -21,6 +22,7 @@
   --line: #2a2a2a;
   --card: #171717;
   --dot: #404040;
+  --marker: #8a6d00;
   color-scheme: dark;
 }
 
@@ -832,6 +834,48 @@ html[data-nv='date'] .topics {
   padding-left: 1em;
   border-left: 2px solid var(--line);
   color: var(--muted);
+}
+/* An Obsidian callout: a soft card with its title on top */
+.prose .callout {
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 16px;
+}
+.prose .callout > * + * {
+  margin-top: 0.8em;
+}
+.prose .callout-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.prose summary.callout-title {
+  cursor: pointer;
+}
+.prose .callout pre {
+  background: var(--bg);
+}
+.prose .callout code {
+  background: var(--bg);
+}
+/* ==highlight==: the one colour on the site, a marker over the lower half of the line */
+.prose mark {
+  padding: 0 2px;
+  background: linear-gradient(transparent 45%, var(--marker) 45%);
+  color: inherit;
+}
+/* Formulas: a long one scrolls sideways on its own */
+.prose mjx-container[display='true'] {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  text-align: center;
+}
+.prose mjx-container svg {
+  display: inline;
+  max-width: none;
 }
 .prose hr {
   margin: 2.4em 0;

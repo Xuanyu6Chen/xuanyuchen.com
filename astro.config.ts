@@ -2,7 +2,9 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { site } from './site.config';
-import { tidyLinksAndImages } from './src/lib/markdown.mjs';
+import remarkMath from 'remark-math';
+import rehypeMathjax from 'rehype-mathjax';
+import { moneyNotMath, obsidian, tidyLinksAndImages } from './src/lib/markdown.mjs';
 
 export default defineConfig({
   site: site.url,
@@ -20,6 +22,8 @@ export default defineConfig({
       themes: { light: 'min-light', dark: 'min-dark' },
       defaultColor: false,
     },
-    rehypePlugins: [[tidyLinksAndImages, { home: site.url }]],
+    // LaTeX between $...$ and $$...$$, drawn at build time the way Obsidian draws it (MathJax)
+    remarkPlugins: [moneyNotMath, remarkMath],
+    rehypePlugins: [obsidian, rehypeMathjax, [tidyLinksAndImages, { home: site.url }]],
   },
 });

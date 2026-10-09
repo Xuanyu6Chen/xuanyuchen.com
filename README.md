@@ -97,6 +97,15 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
 3. A new topic is one line in `topics` in `site.config.ts`. A note whose topic is not listed
    there shows under "Other notes".
 
+4. Beyond standard Markdown, a note may use what Obsidian writes (`src/lib/markdown.mjs`):
+
+   | Written | Becomes |
+   |---|---|
+   | `$x^2$` and `$$ ... $$` | a formula (LaTeX, drawn at build time by MathJax). A price such as `$73` stays a price |
+   | `==text==` | highlighted text |
+   | `> [!note] Title` | a callout card; `[!note]-` starts folded |
+   | `[[Note]]`, `[[Note\|shown text]]`, `[[Note#Heading]]` | a link to that note if it is published, plain text if not. `Note` is the site file name |
+
 A note with `draft: true`, or a `pubDate` in the future, appears in `npm run dev` only.
 
 ## Add a piece of work
