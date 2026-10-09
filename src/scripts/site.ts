@@ -1,5 +1,6 @@
 // Everything the site does after it loads: which animation a page change gets, things rising in
-// as you scroll, the bar at the top, the two Notes switches, the light/dark button, and search.
+// as you scroll, the bar at the top, the two Notes switches, the light/dark button, search,
+// and drawing a note's diagrams.
 // Pages are swapped in place (see <ClientRouter /> in Page.astro), so this file runs once and
 // listens on the document instead of on elements that get replaced.
 import { navigate } from 'astro:transitions/client';
@@ -155,6 +156,7 @@ document.addEventListener('click', (event) => {
   } catch {
     /* storage can be blocked; the choice then lasts for this page only */
   }
+  drawDiagrams();
 });
 
 /* 7. Search. Opens from the magnifier or with Cmd/Ctrl + K. The list of everything on the site
@@ -270,8 +272,51 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+/* 8. Diagrams. A ```mermaid block in a note arrives as text and is drawn here, in the site's
+      own black and white. The drawing library is fetched only on a page that has a diagram,
+      and the diagrams are drawn again when light / dark changes. */
+let drawn = 0; // every drawing gets its own id, so a redraw never collides with the one it replaces
+
+async function drawDiagrams() {
+  const blocks = [...document.querySelectorAll<HTMLElement>('pre.mermaid, .diagram')];
+  if (!blocks.length) return;
+  const { default: mermaid } = await import('mermaid');
+  const colour = (name: string) => getComputedStyle(root).getPropertyValue(name).trim();
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      darkMode: root.classList.contains('dark'),
+      fontFamily: colour('--sans'),
+      fontSize: '15px',
+      background: colour('--bg'),
+      primaryColor: colour('--card'),
+      primaryTextColor: colour('--fg'),
+      primaryBorderColor: colour('--dot'),
+      secondaryColor: colour('--card'),
+      tertiaryColor: colour('--bg'),
+      lineColor: colour('--muted'),
+      textColor: colour('--fg'),
+    },
+  });
+  for (const block of blocks) {
+    const source = block.dataset.source ?? block.textContent ?? '';
+    try {
+      const { svg } = await mermaid.render(`diagram-${++drawn}`, source);
+      const figure = document.createElement('div');
+      figure.className = 'diagram';
+      figure.dataset.source = source;
+      figure.innerHTML = svg;
+      block.replaceWith(figure);
+    } catch {
+      block.classList.add('failed'); // a diagram that cannot be drawn stays readable as text
+    }
+  }
+}
+
 // Runs on the first load and after every page change
 document.addEventListener('astro:page-load', () => {
+  drawDiagrams();
   reveal();
   findSections();
   onScroll();

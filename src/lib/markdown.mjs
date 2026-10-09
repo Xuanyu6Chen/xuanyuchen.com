@@ -1,6 +1,7 @@
 // Touch-ups applied to every note as it is turned into a page.
 // 1. obsidianMath: math as Obsidian reads it, and a dollar sign that is a price stays a price.
 //    lineBreaks: a new line inside a paragraph is a new line on the page, as in Obsidian.
+//    mermaidBlocks: a ```mermaid block is handed to the browser to draw as a diagram.
 // 2. obsidian: the Obsidian syntax a note may carry: callouts, ==highlights== and [[links]].
 // 3. tidyLinksAndImages: links to other sites open in a new tab, images load when about to be seen.
 
@@ -97,6 +98,20 @@ export function lineBreaks() {
         : [child],
     );
     node.children.forEach(visit);
+  };
+  return (tree) => visit(tree);
+}
+
+// A ```mermaid block is kept as plain text instead of being coloured as code;
+// src/scripts/site.ts draws it once the page is open.
+export function mermaidBlocks() {
+  const escaped = (source) => source.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const visit = (node) => {
+    (node.children ?? []).forEach((child, i) => {
+      if (child.type === 'code' && child.lang === 'mermaid') {
+        node.children[i] = { type: 'html', value: `<pre class="mermaid">${escaped(child.value)}</pre>` };
+      } else visit(child);
+    });
   };
   return (tree) => visit(tree);
 }

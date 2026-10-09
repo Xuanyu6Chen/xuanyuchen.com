@@ -877,6 +877,19 @@ html[data-nv='date'] .topics {
   display: inline;
   max-width: none;
 }
+/* A diagram (```mermaid): hidden as text until it is drawn, centred, scrolls sideways if wide */
+.js .prose pre.mermaid:not(.failed) {
+  visibility: hidden;
+}
+.prose .diagram {
+  overflow-x: auto;
+  text-align: center;
+}
+.prose .diagram svg {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
 .prose hr {
   margin: 2.4em 0;
   border: 0;
@@ -933,6 +946,19 @@ html[data-nv='date'] .topics {
   overflow-x: auto;
   font-size: 14px;
   line-height: 1.6;
+}
+/* The block's language, small in its top right corner; it stays put when a long line is scrolled */
+.prose pre[data-language]:not([data-language='plaintext'])::before {
+  content: attr(data-language);
+  display: block;
+  position: sticky;
+  left: 0;
+  margin: -6px 0 6px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 .prose pre code {
   padding: 0;

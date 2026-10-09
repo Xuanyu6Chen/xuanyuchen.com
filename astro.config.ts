@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import { site } from './site.config';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
-import { lineBreaks, obsidianMath, obsidian, tidyLinksAndImages } from './src/lib/markdown.mjs';
+import { lineBreaks, mermaidBlocks, obsidianMath, obsidian, tidyLinksAndImages } from './src/lib/markdown.mjs';
 
 export default defineConfig({
   site: site.url,
@@ -23,7 +23,7 @@ export default defineConfig({
       defaultColor: false,
     },
     // LaTeX between $...$ and $$...$$, drawn at build time the way Obsidian draws it (MathJax)
-    remarkPlugins: [obsidianMath, remarkMath, lineBreaks],
+    remarkPlugins: [obsidianMath, remarkMath, lineBreaks, mermaidBlocks],
     rehypePlugins: [obsidian, rehypeMathjax, [tidyLinksAndImages, { home: site.url }]],
   },
 });
