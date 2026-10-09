@@ -1,16 +1,22 @@
 // Touch-ups applied to every note as it is turned into a page.
-// 1. moneyNotMath: a dollar sign that is a price stays a price once math is switched on.
+// 1. obsidianMath: math as Obsidian reads it, and a dollar sign that is a price stays a price.
+//    lineBreaks: a new line inside a paragraph is a new line on the page, as in Obsidian.
 // 2. obsidian: the Obsidian syntax a note may carry: callouts, ==highlights== and [[links]].
 // 3. tidyLinksAndImages: links to other sites open in a new tab, images load when about to be seen.
 
 import fs from 'node:fs';
 import path from 'node:path';
 
-/* ---------- 1. Prices are not formulas ---------- */
+/* ---------- 1. Math the way Obsidian reads it ---------- */
 
-// Obsidian's rule for $...$: the opening $ is followed by a character that is not a space, the
-// closing $ follows one that is not a space and is not followed by a digit. "$73 to $87" fails
-// it, so both signs are escaped before the note is parsed. Code is left alone.
+// The parser's own rules for $ differ from Obsidian's in three places, so the note's text is
+// adjusted before it is parsed. Code is left alone.
+// - Obsidian's rule for $...$: the opening $ is followed by a character that is not a space, the
+//   closing $ follows one that is not a space and is not followed by a digit. "$73 to $87" fails
+//   it, so both signs are escaped and stay prices.
+// - A formula that holds a \$ ("$P = \$900$") is fenced with $$ so the inner sign cannot end it.
+// - A formula written as $$...$$ on one line is put on lines of its own, which is what makes it
+//   a centred formula instead of one inside the sentence.
 function escapeLoneDollars(text) {
   let out = '';
   for (let i = 0; i < text.length; i++) {
@@ -25,15 +31,18 @@ function escapeLoneDollars(text) {
       continue;
     }
     if (text[i + 1] === '$') {
-      out += '$$';
-      i++;
+      // $$...$$ inside a line passes through untouched
+      const end = text.indexOf('$$', i + 2);
+      const stop = end < 0 ? i + 1 : end + 1;
+      out += text.slice(i, stop + 1);
+      i = stop;
       continue;
     }
     let close = -1;
     if (/\S/.test(text[i + 1] ?? ' ')) {
-      for (let j = i + 2; j < text.length; j++) {
+      for (let j = i + 1; j < text.length; j++) {
         if (text[j] === '\\') j++;
-        else if (text[j] === '$' && /\S/.test(text[j - 1]) && !/[\d$]/.test(text[j + 1] ?? '')) {
+        else if (j > i + 1 && text[j] === '$' && /\S/.test(text[j - 1]) && !/[\d$]/.test(text[j + 1] ?? '')) {
           close = j;
           break;
         }
@@ -41,19 +50,20 @@ function escapeLoneDollars(text) {
     }
     if (close < 0) out += '\\$';
     else {
-      out += text.slice(i, close + 1);
+      const formula = text.slice(i, close + 1);
+      out += formula.slice(1, -1).includes('$') ? `$${formula}$` : formula;
       i = close;
     }
   }
   return out;
 }
 
-function escapeMoney(doc) {
-  let fence = null;
+function asObsidianReadsMath(doc) {
+  let fence = null; // inside a code block, or a formula already on lines of its own
   return doc
     .split('\n')
     .map((line) => {
-      const mark = line.match(/^\s*(?:>\s*)*(`{3,}|~{3,})/)?.[1];
+      const mark = line.match(/^\s*(?:>\s*)*(`{3,}|~{3,}|\$\$\s*$)/)?.[1].trim();
       if (fence) {
         if (mark && mark[0] === fence[0] && mark.length >= fence.length) fence = null;
         return line;
@@ -62,6 +72,8 @@ function escapeMoney(doc) {
         fence = mark;
         return line;
       }
+      const whole = line.match(/^(\s*(?:>\s*)*)\$\$(.+)\$\$\s*$/);
+      if (whole && !whole[2].includes('$$')) return `${whole[1]}$$\n${whole[1]}${whole[2]}\n${whole[1]}$$`;
       // odd pieces are `inline code`
       return line
         .split(/(`+[^`]*`+)/)
@@ -71,9 +83,22 @@ function escapeMoney(doc) {
     .join('\n');
 }
 
-export function moneyNotMath() {
+export function obsidianMath() {
   const parse = this.parser;
-  this.parser = (doc, file) => parse(escapeMoney(String(doc)), file);
+  this.parser = (doc, file) => parse(asObsidianReadsMath(String(doc)), file);
+}
+
+export function lineBreaks() {
+  const visit = (node) => {
+    if (!node.children) return;
+    node.children = node.children.flatMap((child) =>
+      child.type === 'text' && child.value.includes('\n')
+        ? child.value.split(/\n/).flatMap((line, i) => (i ? [{ type: 'break' }, { type: 'text', value: line }] : [{ type: 'text', value: line }]))
+        : [child],
+    );
+    node.children.forEach(visit);
+  };
+  return (tree) => visit(tree);
 }
 
 /* ---------- 2. Obsidian syntax ---------- */
@@ -169,14 +194,28 @@ function highlights(children) {
 function callout(quote) {
   const first = quote.children.find((child) => child.type === 'element');
   const lead = first?.tagName === 'p' ? first.children[0] : undefined;
-  const m = lead?.type === 'text' ? lead.value.match(/^\[!([\w-]+)\]([+-]?)[ \t]*([^\n]*)\n?/) : null;
+  const m = lead?.type === 'text' ? lead.value.match(/^\[!([\w-]+)\]([+-]?)[ \t]*/) : null;
   if (!m) return;
-  const [whole, kind, fold, title] = m;
+  const [whole, kind, fold] = m;
 
+  // the title is the rest of the first line, formulas and bold included
   lead.value = lead.value.slice(whole.length);
-  if (!lead.value) first.children.shift();
+  const end = first.children.findIndex(
+    (child) => child.tagName === 'br' || (child.type === 'text' && child.value.includes('\n')),
+  );
+  const heading = first.children.splice(0, end < 0 ? first.children.length : end);
+  const cut = first.children[0];
+  if (cut?.tagName === 'br') first.children.shift();
+  else if (cut) {
+    const at = cut.value.indexOf('\n');
+    if (cut.value.slice(0, at)) heading.push(text(cut.value.slice(0, at)));
+    cut.value = cut.value.slice(at + 1);
+  }
+  while (first.children[0]?.type === 'text' && !first.children[0].value.trim()) first.children.shift();
+  if (!heading.some((node) => node.type !== 'text' || node.value.trim())) {
+    heading.splice(0, heading.length, text(kind[0].toUpperCase() + kind.slice(1).replace(/-/g, ' ')));
+  }
   const body = quote.children.filter((child) => child !== first || first.children.length);
-  const heading = [text(title.trim() || kind[0].toUpperCase() + kind.slice(1).replace(/-/g, ' '))];
 
   quote.properties = { className: ['callout'], dataCallout: kind.toLowerCase() };
   if (fold) {

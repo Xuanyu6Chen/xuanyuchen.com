@@ -101,7 +101,8 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
 
    | Written | Becomes |
    |---|---|
-   | `$x^2$` and `$$ ... $$` | a formula (LaTeX, drawn at build time by MathJax). A price such as `$73` stays a price |
+   | `$x^2$` and `$$ ... $$` | a formula (LaTeX, drawn at build time by MathJax); `$$ ... $$` on a line of its own is centred. A price such as `$73` stays a price |
+   | a new line inside a paragraph | a new line on the page, as in Obsidian |
    | `==text==` | highlighted text |
    | `> [!note] Title` | a callout card; `[!note]-` starts folded |
    | `[[Note]]`, `[[Note\|shown text]]`, `[[Note#Heading]]` | a link to that note if it is published, plain text if not. `Note` is the site file name |
