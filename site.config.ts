@@ -15,6 +15,8 @@ export interface Topic {
   id: string;
   title: string;
   label?: string; // shown instead of the "3 notes" count
+  subject?: string; // shown on its card; the heading the card sits under in "By topic"
+  about?: string; // a line about the topic, shown first when its card is opened
   empty?: string; // line shown inside a topic that has no notes yet
 }
 
@@ -60,10 +62,15 @@ export const work: WorkItem[] = [
 export const topics: Topic[] = [
   {
     id: 'money-and-banking',
-    title: 'Money and banking',
-    label: 'Mishkin · coming',
+    title: 'Money, Banking, and Financial Markets',
+    subject: 'Economics',
+    about: 'Learning from The Economics of Money, Banking, and Financial Markets, by Frederic S. Mishkin.',
     empty: 'Chapter notes will be listed here.',
   },
-  { id: 'llm-fine-tuning', title: 'LLM fine-tuning' },
-  { id: 'oil-markets', title: 'Oil markets' },
+  { id: 'llm-fine-tuning', title: 'LLM fine-tuning', subject: 'AI' },
+  { id: 'oil-markets', title: 'Oil markets', subject: 'Markets' },
+  { id: 'linear-algebra', title: 'Linear algebra', subject: 'Math' },
+  { id: 'regression', title: 'Regression', subject: 'Statistics' },
+  { id: 'probability', title: 'Probability', subject: 'Statistics' },
+  { id: 'statistical-theory', title: 'Statistical theory', subject: 'Statistics' },
 ];

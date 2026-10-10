@@ -3,7 +3,7 @@
 The source of [xuanyuchen.com](https://xuanyuchen.com): Xuanyu Chen's work and notes.
 
 The site has two tabs. **Work** is a gallery; each tile opens into its own page. **Notes** lists
-the same notes two ways, by topic or by date. It is built with [Astro](https://astro.build) into
+the same notes three ways: by card, by topic (the cards under their subject) or by date. It is built with [Astro](https://astro.build) into
 plain files (HTML, CSS, a little JavaScript) and served by GitHub Pages.
 
 ## Run it
@@ -94,7 +94,8 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
 2. Pictures go in `public/images/<topic>/` and are written as
    `![What it shows](/images/<topic>/file.png)`. A line of italics directly under a picture
    becomes its caption.
-3. A new topic is one line in `topics` in `site.config.ts`. A note whose topic is not listed
+3. A new topic is one line in `topics` in `site.config.ts`; its `subject` is shown on its
+   card and is the heading the card sits under in "By topic", and `about` is a line shown first when the card is opened. A note whose topic is not listed
    there shows under "Other notes".
 
 4. Beyond standard Markdown, a note may use what Obsidian writes (`src/lib/markdown.mjs`):
@@ -143,7 +144,8 @@ Every push to `main` runs `.github/workflows/deploy.yml`, which builds the site 
   to leave `node_modules/`, `dist/`, `.astro/` and `.git/` alone. The first three are
   regenerable and the fourth is backed up on GitHub; iCloud fills all of them with duplicate
   files otherwise. Anywhere else the script does nothing. `npm run prepare` runs it on its own.
-- The fonts (Inter, JetBrains Mono) are installed as packages and served from the site itself.
+- The fonts (Inter, JetBrains Mono, and Instrument Serif for the subject headings on Notes) are
+  installed as packages and served from the site itself.
   The site sets no cookies and loads nothing from other servers.
 
 ## Rights

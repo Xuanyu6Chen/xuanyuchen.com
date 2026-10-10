@@ -115,7 +115,9 @@ document.addEventListener('click', (event) => {
   button.parentElement.querySelector('.fold')?.toggleAttribute('inert', !open);
 });
 
-/* 5. Notes: arranged by topic or by date. <html data-nv> says which; site.css shows that one. */
+/* 5. Notes: arranged by card, by topic or by date. <html data-nv> says which; site.css shows
+      that one. In the code the three are 'topic' (by card), 'subject' (by topic) and 'date'. */
+const arrangements = ['topic', 'subject', 'date'];
 const showArrangement = () =>
   document
     .querySelectorAll<HTMLElement>('.seg-b')
@@ -125,8 +127,9 @@ document.addEventListener('click', (event) => {
   if (!(event.target instanceof Element)) return;
   const button = event.target.closest<HTMLElement>('.seg-b');
   if (!button) return;
-  const view = button.dataset.nv === 'date' ? 'date' : 'topic';
-  if ((root.dataset.nv ?? 'topic') === view) return;
+  const view = arrangements.includes(button.dataset.nv ?? '') ? button.dataset.nv! : 'topic';
+  const from = root.dataset.nv ?? 'topic';
+  if (from === view) return;
 
   const apply = () => {
     root.dataset.nv = view;
@@ -141,7 +144,7 @@ document.addEventListener('click', (event) => {
   if (!document.startViewTransition || lessMotion()) return apply();
 
   // slide the notes sideways, the same move as switching between Work and Notes
-  root.dataset.nvAnim = view === 'date' ? 'fwd' : 'back';
+  root.dataset.nvAnim = arrangements.indexOf(view) > arrangements.indexOf(from) ? 'fwd' : 'back';
   const transition = document.startViewTransition(apply);
   transition.ready.catch(() => {}); // an interrupted animation is fine: the change still applies
   transition.finished.finally(() => delete root.dataset.nvAnim);

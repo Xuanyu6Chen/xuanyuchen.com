@@ -13,6 +13,7 @@
   --r: 26px;
   --sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --serif: 'Instrument Serif', ui-serif, Georgia, serif; /* the subject headings on Notes, nowhere else */
   color-scheme: light;
 }
 .dark {
@@ -446,12 +447,13 @@ html.js [data-rv].in {
 }
 
 /* ---------- Notes ---------- */
-/* Notes can be arranged two ways. <html data-nv="topic|date"> says which one shows;
-   it is set from the saved choice before the page paints (see Page.astro). */
+/* Notes can be arranged three ways. <html data-nv="topic|subject|date"> says which one shows
+   ('topic' is the by-card view); it is set from the saved choice before the page paints
+   (see Page.astro). */
 .seg {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   align-self: center;
   margin-left: auto;
   padding: 4px;
@@ -481,30 +483,37 @@ html.js [data-rv].in {
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc(50% - 4px);
+  width: calc((100% - 8px) / 3);
   border-radius: 999px;
   background: var(--bg);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
   transition: translate 0.45s var(--ease);
 }
-html[data-nv='date'] .seg-pill {
+html[data-nv='subject'] .seg-pill {
   translate: 100% 0;
 }
-html:not([data-nv='date']) .seg-b[data-nv='topic'],
+html[data-nv='date'] .seg-pill {
+  translate: 200% 0;
+}
+html:not([data-nv='subject'], [data-nv='date']) .seg-b[data-nv='topic'],
+html[data-nv='subject'] .seg-b[data-nv='subject'],
 html[data-nv='date'] .seg-b[data-nv='date'] {
   color: var(--fg);
 }
+.subjects,
 .dates {
   display: none;
 }
+html[data-nv='subject'] .subjects,
 html[data-nv='date'] .dates {
   display: block;
 }
-html[data-nv='date'] .topics {
+html[data-nv='subject'] .notes > .topics,
+html[data-nv='date'] .notes > .topics {
   display: none;
 }
 
-/* By topic: one card per topic; click it and it unfolds */
+/* By card: one card per topic; click it and it unfolds. By topic: the same cards under their subject */
 .topics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -536,8 +545,57 @@ html[data-nv='date'] .topics {
 .rowl .type {
   background: var(--bg);
 }
-.topic .type {
-  align-self: flex-start;
+.topic .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+/* the card's subject, small in its top right corner */
+.subj {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+/* By topic: each subject is a serif italic name, a hairline running to its card count */
+.subject + .subject {
+  margin-top: 44px;
+}
+.subject-top {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 4px 16px;
+}
+.subject-top::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  border-top: 1px solid var(--line);
+  translate: 0 -0.3em;
+}
+.subject-h {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(34px, 4vw, 44px);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.subject-n {
+  order: 2;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+/* under a subject heading it would only repeat the heading */
+.subjects .subj {
+  display: none;
+}
+.topic:hover .subj,
+.topic.open .subj {
+  color: color-mix(in srgb, currentColor 70%, transparent);
 }
 .topic:hover .type,
 .topic.open .type,
@@ -616,6 +674,18 @@ html[data-nv='date'] .topics {
 }
 .topic.open .fold li.dim {
   opacity: 0.55;
+}
+/* the line about the topic: quieter than the notes under it */
+.fold li.about {
+  border-top: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.fold li.about > * {
+  padding-top: 0;
+}
+.topic.open .fold li.about {
+  opacity: 0.7;
 }
 
 /* By date: one list, newest first; a row turns black under the pointer, like a topic card */
@@ -1148,7 +1218,7 @@ html[data-astro-transition='open']::view-transition-new(page),
 html[data-astro-transition='close']::view-transition-new(page) {
   animation: 0.45s ease 0.18s both vt-fade-in;
 }
-/* Notes, by topic <-> by date: only the notes slide; the rest of the page holds still */
+/* Notes, from one arrangement to another: only the notes slide; the rest of the page holds still */
 html[data-nv-anim] .notes {
   view-transition-name: notes;
 }

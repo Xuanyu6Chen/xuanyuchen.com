@@ -1,0 +1,53 @@
+---
+// One topic on the Notes page: a card that unfolds into its notes when clicked.
+import type { Topic } from '../../site.config';
+import { noteUrl, type Note } from '../lib/content';
+
+interface Props {
+  card: Topic & { notes: Note[] };
+}
+const { card } = Astro.props;
+
+const count = (n: number) => `${n} ${n === 1 ? 'note' : 'notes'}`;
+const first = card.about ? 1 : 0; // the notes come after the line about the topic
+---
+
+<div class="topic" data-rv>
+  <button class="topic-h" type="button" aria-expanded="false">
+    <span class="top">
+      <span class="type">{card.label ?? count(card.notes.length)}</span>
+      {card.subject && <span class="subj">{card.subject}</span>}
+    </span>
+    <span class="row">
+      <span class="name">
+        <span class="ul">{card.title}</span>
+      </span>
+      <span class="go" aria-hidden="true">+</span>
+    </span>
+  </button>
+  <div class="fold" inert>
+    <ul>
+      {
+        card.about && (
+          <li class="about" style="--i:0">
+            <span>{card.about}</span>
+          </li>
+        )
+      }
+      {
+        card.notes.map((note, i) => (
+          <li style={`--i:${i + first}`}>
+            <a href={noteUrl(note)}>{note.data.title}</a>
+          </li>
+        ))
+      }
+      {
+        card.notes.length === 0 && (
+          <li class="dim" style={`--i:${first}`}>
+            <span>{card.empty ?? 'Nothing here yet.'}</span>
+          </li>
+        )
+      }
+    </ul>
+  </div>
+</div>

@@ -1,14 +1,16 @@
 ---
-// Notes: the same notes arranged two ways.
-// By topic: one card per topic; clicking a card unfolds its notes.
+// Notes: the same notes arranged three ways.
+// By card: one card per topic; clicking a card unfolds its notes.
+// By topic: the same cards, under the subject each one belongs to.
 // By date: one list, newest first.
 import Page from '../../layouts/Page.astro';
+import TopicCard from '../../components/TopicCard.astro';
 import { topics, type Topic } from '../../../site.config';
 import { getNotes, notesIn, noteUrl, shortDate, topicOf, type Note } from '../../lib/content';
 
 const notes = await getNotes();
 
-// By topic
+// By card
 const cards: (Topic & { notes: Note[] })[] = topics.map((topic) => ({
   ...topic,
   notes: notesIn(topic.id, notes),
@@ -17,7 +19,11 @@ const cards: (Topic & { notes: Note[] })[] = topics.map((topic) => ({
 const loose = notes.filter((note) => !topicOf(note));
 if (loose.length > 0) cards.push({ id: 'other', title: 'Other notes', notes: loose });
 
-const count = (n: number) => `${n} ${n === 1 ? 'note' : 'notes'}`;
+// By subject, in the order the subjects first appear in site.config.ts
+const subjectOf = (card: Topic) => card.subject ?? 'Other';
+const subjects = [...new Set(cards.map(subjectOf))];
+const inSubject = (subject: string) => cards.filter((card) => subjectOf(card) === subject);
+const countCards = (n: number) => `${n} ${n === 1 ? 'card' : 'cards'}`;
 
 // By date (getNotes already returns them newest first)
 const years = [...new Set(notes.map((note) => note.data.pubDate.getUTCFullYear()))];
@@ -28,42 +34,29 @@ const years = [...new Set(notes.map((note) => note.data.pubDate.getUTCFullYear()
     <h2>Notes</h2>
     <div class="seg" role="group" aria-label="Arrange notes">
       <span class="seg-pill" aria-hidden="true"></span>
-      <button class="seg-b" type="button" data-nv="topic" aria-pressed="true">By topic</button>
+      <button class="seg-b" type="button" data-nv="topic" aria-pressed="true">By card</button>
+      <button class="seg-b" type="button" data-nv="subject" aria-pressed="false">By topic</button>
       <button class="seg-b" type="button" data-nv="date" aria-pressed="false">By date</button>
     </div>
   </div>
 
   <div class="notes">
     <div class="topics">
+      {cards.map((card) => <TopicCard card={card} />)}
+    </div>
+
+    <div class="subjects">
       {
-        cards.map((card) => (
-          <div class="topic" data-rv>
-            <button class="topic-h" type="button" aria-expanded="false">
-              <span class="type">{card.label ?? count(card.notes.length)}</span>
-              <span class="row">
-                <span class="name">
-                  <span class="ul">{card.title}</span>
-                </span>
-                <span class="go" aria-hidden="true">
-                  +
-                </span>
-              </span>
-            </button>
-            <div class="fold" inert>
-              <ul>
-                {card.notes.map((note, i) => (
-                  <li style={`--i:${i}`}>
-                    <a href={noteUrl(note)}>{note.data.title}</a>
-                  </li>
-                ))}
-                {card.notes.length === 0 && (
-                  <li class="dim" style="--i:0">
-                    <span>{card.empty ?? 'Nothing here yet.'}</span>
-                  </li>
-                )}
-              </ul>
+        subjects.map((subject) => (
+          <section class="subject" data-rv>
+            <div class="subject-top">
+              <h3 class="subject-h">{subject}</h3>
+              <span class="subject-n">{countCards(inSubject(subject).length)}</span>
             </div>
-          </div>
+            <div class="topics">
+              {inSubject(subject).map((card) => <TopicCard card={card} />)}
+            </div>
+          </section>
         ))
       }
     </div>
