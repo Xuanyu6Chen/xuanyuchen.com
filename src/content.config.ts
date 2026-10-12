@@ -16,6 +16,17 @@ const notes = defineCollection({
   }),
 });
 
+// The Chinese version of a note: content/notes/zh/<same file name>.md. Its date and topic come from the note.
+const notesZh = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/notes/zh' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().default(''),
+    intro: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
 const work = defineCollection({
   loader: glob({ pattern: '*.md', base: './content/work' }),
   schema: z.object({
@@ -27,4 +38,4 @@ const work = defineCollection({
   }),
 });
 
-export const collections = { notes, work };
+export const collections = { notes, notesZh, work };

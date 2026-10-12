@@ -16,9 +16,10 @@ interface Props {
   description?: string;
   name?: boolean; // show the large name above the page (Work and Notes)
   published?: Date; // set on notes: marks the page as an article for search engines
+  lang?: string; // the language the page is written in
 }
 
-const { title, description = site.description, name = false, published } = Astro.props;
+const { title, description = site.description, name = false, published, lang = 'en' } = Astro.props;
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
 const address = new URL(Astro.url.pathname, site.url).toString();
 const preview = new URL('/preview.png', site.url).toString();
@@ -35,7 +36,7 @@ const article = published && {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

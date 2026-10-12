@@ -23,6 +23,7 @@ npm run preview    # serves dist/, to check the build before it is published
 site.config.ts         what the site shows: name, footer links, Work tiles, Notes topics
 content/
   notes/               one Markdown file per note
+    zh/                the Chinese version of a note, under the same file name
   work/                one Markdown file per piece of work
 public/                served as is: images, icon, link-preview picture, robots.txt
 src/
@@ -30,7 +31,7 @@ src/
   lib/content.ts       reads content/ and answers questions about it (address, topic, dates)
   lib/markdown.mjs     touch-ups applied to every note as it is built
   layouts/Page.astro   the frame around every page: top bar, name, the page, footer
-  components/          TopBar, Name, WorkPicture, Search, Forward
+  components/          TopBar, Name, NoteView, WorkPicture, Search, Forward
   pages/               one file per address (table below)
   styles/site.css      the whole look
   scripts/site.ts      everything that happens in the browser
@@ -44,6 +45,7 @@ astro.config.ts        build settings
 | `/projects/<name>/` | `src/pages/projects/[slug].astro` (one piece of work) |
 | `/posts/` | `src/pages/posts/index.astro` (Notes) |
 | `/posts/<name>/` | `src/pages/posts/[slug].astro` (one note) |
+| `/posts/<name>/zh/` | `src/pages/posts/[slug]/zh.astro` (its Chinese version, if it has one) |
 | `/rss.xml`, `/search.json` | `src/pages/rss.xml.ts`, `src/pages/search.json.ts` |
 | anything else | `src/pages/404.astro` |
 
@@ -113,6 +115,13 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    | `[[Note]]`, `[[Note\|shown text]]`, `[[Note#Heading]]` | a link to that note if it is published, plain text if not. `Note` is the site file name |
 
 A note with `draft: true`, or a `pubDate` in the future, appears in `npm run dev` only.
+
+### A Chinese version
+
+A note can have a Chinese version: `content/notes/zh/<same file name>.md`, with its own `title`
+(and optionally `description`, `intro`, `draft`). Its date and topic come from the note itself.
+The note then shows an `EN | 中文` switch beside its date, and the Chinese text answers at
+`/posts/<name>/zh/`. Notes, search and the feed list the note once, in English.
 
 ## Add a piece of work
 

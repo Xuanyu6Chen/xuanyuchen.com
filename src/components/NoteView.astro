@@ -1,0 +1,129 @@
+---
+// One note as a page, in English or in its Chinese version. Both addresses draw this.
+import { render } from 'astro:content';
+import Page from '../layouts/Page.astro';
+import {
+  getNotes,
+  getTranslations,
+  inlineHtml,
+  longDate,
+  minutesToRead,
+  notesIn,
+  noteUrl,
+  topicOf,
+  zhUrl,
+  type Note,
+} from '../lib/content';
+
+interface Props {
+  note: Note;
+  lang: 'en' | 'zh';
+}
+
+const { note, lang } = Astro.props;
+const translations = await getTranslations();
+const zh = translations.get(note.id);
+if (lang === 'zh' && !zh) throw new Error(`No Chinese version of ${note.id} in content/notes/zh/`);
+const shown = lang === 'zh' && zh ? zh : note; // the text on this page; date and topic always come from the note
+const { Content, headings } = await render(shown);
+
+// A Chinese page keeps the reader in Chinese wherever the next note has a Chinese version
+const inZh = (n: Note) => (lang === 'zh' ? translations.get(n.id) : undefined);
+const titleOf = (n: Note) => inZh(n)?.data.title ?? n.data.title;
+const urlOf = (n: Note) => (inZh(n) ? zhUrl(n) : noteUrl(n));
+
+// Where this note sits in its topic
+const topic = topicOf(note);
+const siblings = topic ? notesIn(topic.id, await getNotes()) : [];
+const place = siblings.findIndex((n) => n.id === note.id);
+const before = place > 0 ? siblings[place - 1] : undefined;
+const after = place >= 0 && place < siblings.length - 1 ? siblings[place + 1] : undefined;
+
+const contents = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const meta = [longDate(note.data.pubDate), topic?.title, `${minutesToRead(shown)} min read`].filter(Boolean);
+---
+
+<Page title={shown.data.title} description={shown.data.description} published={note.data.pubDate} lang={lang}>
+  <a class="back" href="/posts/">
+    <span aria-hidden="true">&larr;</span> Back to notes
+  </a>
+
+  <div class="note">
+    <article>
+      <header class="note-head">
+        <div class="note-top">
+          <p class="meta">{meta.join(' · ')}</p>
+          {zh && (
+            <nav class="lang" aria-label="Language">
+              <a href={noteUrl(note)} lang="en" aria-current={lang === 'en' ? 'page' : undefined}>EN</a>
+              <a href={zhUrl(note)} lang="zh" aria-current={lang === 'zh' ? 'page' : undefined}>中文</a>
+            </nav>
+          )}
+        </div>
+        <h1>{shown.data.title}</h1>
+        {shown.data.description && <p class="lead">{shown.data.description}</p>}
+      </header>
+
+      {shown.data.intro && (
+        <div class="prose">
+          <p set:html={inlineHtml(shown.data.intro)} />
+        </div>
+      )}
+
+      {siblings.length > 1 && topic && (
+        <nav class="in-topic" aria-label={`Notes in ${topic.title}`}>
+          <p class="meta">
+            {topic.title} · part {place + 1} of {siblings.length}
+          </p>
+          <ol>
+            {siblings.map((n) => (
+              <li>
+                {n.id === note.id ? (
+                  <span aria-current="page">{titleOf(n)}</span>
+                ) : (
+                  <a href={urlOf(n)}>{titleOf(n)}</a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      {(before || after) && (
+        <nav class="next-prev" aria-label="More in this topic">
+          {before ? (
+            <a href={urlOf(before)}>
+              <span class="meta">&larr; Previous</span>
+              <b>{titleOf(before)}</b>
+            </a>
+          ) : (
+            <span />
+          )}
+          {after && (
+            <a class="next" href={urlOf(after)}>
+              <span class="meta">Next &rarr;</span>
+              <b>{titleOf(after)}</b>
+            </a>
+          )}
+        </nav>
+      )}
+    </article>
+
+    {contents.length > 1 && (
+      <aside class="toc" aria-label="On this page">
+        <p class="meta">On this page</p>
+        <ul>
+          {contents.map((h) => (
+            <li class:list={[{ sub: h.depth === 3 }]}>
+              <a href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </div>
+</Page>

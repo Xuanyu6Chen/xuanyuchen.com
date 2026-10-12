@@ -9,6 +9,7 @@ export function inlineHtml(text: string): string {
 }
 
 export type Note = CollectionEntry<'notes'>;
+export type Translation = CollectionEntry<'notesZh'>;
 export type WorkEntry = CollectionEntry<'work'>;
 
 /* ---------- Notes ---------- */
@@ -37,8 +38,23 @@ export const notesIn = (topicId: string, notes: Note[]) =>
     .filter((note) => note.data.series?.id === topicId)
     .sort((a, b) => (a.data.series?.order ?? 0) - (b.data.series?.order ?? 0));
 
-export const minutesToRead = (note: Note) =>
-  Math.max(1, Math.round((note.body ?? '').split(/\s+/).length / 200));
+/** Chinese versions, by the file name of the note they translate. Drafts show only while developing. */
+export async function getTranslations(): Promise<Map<string, Translation>> {
+  const all = await getCollection('notesZh');
+  const live = import.meta.env.DEV ? all : all.filter((zh) => !zh.data.draft);
+  return new Map(live.map((zh) => [zh.id, zh]));
+}
+
+/** The Chinese version of a note lives one step under it: /posts/oil-basics/zh/ */
+export const zhUrl = (note: Note) => `${noteUrl(note)}zh/`;
+
+// 200 words a minute; Chinese has no spaces between words, so it is counted by character, 400 a minute
+export function minutesToRead(text: { body?: string }): number {
+  const body = text.body ?? '';
+  const chinese = body.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+  const words = body.replace(/[\u4e00-\u9fff]/g, ' ').split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200 + chinese / 400));
+}
 
 // Dates in notes are calendar dates, so they are shown the same on every machine
 const dayMonth = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
