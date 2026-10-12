@@ -8,6 +8,7 @@ import { site } from '../../../site.config';
 import {
   datedName,
   getNotes,
+  inlineHtml,
   longDate,
   minutesToRead,
   notesIn,
@@ -62,6 +63,12 @@ const meta = [longDate(note.data.pubDate), topic?.title, `${minutesToRead(note)}
             <h1>{note.data.title}</h1>
             <p class="lead">{note.data.description}</p>
           </header>
+
+          {note.data.intro && (
+            <div class="prose">
+              <p set:html={inlineHtml(note.data.intro)} />
+            </div>
+          )}
 
           {siblings.length > 1 && topic && (
             <nav class="in-topic" aria-label={`Notes in ${topic.title}`}>

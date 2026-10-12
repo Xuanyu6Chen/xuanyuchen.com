@@ -7,6 +7,8 @@ const notes = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    // optional opening paragraph, shown above the list of notes in its topic; may use *italics* and ==highlight==
+    intro: z.string().optional(),
     pubDate: z.coerce.date(),
     // the topic this note belongs to, and its place in that topic
     series: z.object({ id: z.string(), order: z.number() }).optional(),

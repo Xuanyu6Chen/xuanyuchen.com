@@ -87,6 +87,7 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    series:            # optional: the topic this note belongs to
      id: oil-markets  #   a topic id from site.config.ts
      order: 3         #   its place in that topic
+   intro: An opening paragraph.   # optional: shown above the list of notes in its topic; *italics* and ==highlight== work
    draft: false       # true keeps it off the published site
    ---
    ```
@@ -107,6 +108,7 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    | a code block labelled with a language (`python`, `r`, ...) | coloured code with that label in its corner |
    | a code block labelled `mermaid` | a diagram, drawn in the browser (`src/scripts/site.ts`) in the site's colours |
    | `==text==` | highlighted text |
+   | `*text*` | italics one step heavier than the text (weight 500), so a defined term stands out; bold stays stronger (700), and italics inside bold stay bold |
    | `> [!note] Title` | a callout card; `[!note]-` starts folded |
    | `[[Note]]`, `[[Note\|shown text]]`, `[[Note#Heading]]` | a link to that note if it is published, plain text if not. `Note` is the site file name |
 

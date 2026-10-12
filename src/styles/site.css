@@ -929,6 +929,13 @@ html[data-nv='date'] .notes > .topics {
 .prose .callout code {
   background: var(--bg);
 }
+/* Italics a step heavier than the text, so a defined term is seen; inside bold they stay bold */
+.prose em {
+  font-weight: 500;
+}
+.prose strong em {
+  font-weight: inherit;
+}
 /* ==highlight==: the one colour on the site, a marker over the lower half of the line */
 .prose mark {
   padding: 0 2px;

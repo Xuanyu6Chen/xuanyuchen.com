@@ -2,6 +2,12 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { topics, work, type Topic, type WorkItem } from '../../site.config';
 
+/** A line of front matter as HTML: escapes it, then turns ==text== into a highlight and *text* into italics. */
+export function inlineHtml(text: string): string {
+  const safe = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return safe.replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
 export type Note = CollectionEntry<'notes'>;
 export type WorkEntry = CollectionEntry<'work'>;
 
