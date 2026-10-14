@@ -1010,6 +1010,34 @@ html[data-nv='date'] .notes > .topics {
   max-width: 100%;
   height: auto;
 }
+/* A diagram as a map: a box that has details is a button, and its details (a folded callout
+   with the same title) open as a card under the box, in a gap the diagram makes for it */
+.prose:has(.map-detail) {
+  position: relative;
+}
+.prose .diagram .node.has-detail {
+  cursor: pointer;
+}
+.prose .diagram .node.has-detail:hover > :is(rect, polygon, circle, path),
+.prose .diagram .node.has-detail:focus-visible > :is(rect, polygon, circle, path),
+.prose .diagram .node.current > :is(rect, polygon, circle, path) {
+  stroke: var(--fg) !important;
+  stroke-width: 1.5px !important;
+}
+.prose .diagram .node.has-detail:focus {
+  outline: none;
+}
+.prose .callout.map-detail {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  margin-top: 0;
+}
+.prose .callout.map-detail.shown {
+  display: block;
+}
 .prose hr {
   margin: 2.4em 0;
   border: 0;

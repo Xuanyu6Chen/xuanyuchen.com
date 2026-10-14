@@ -109,6 +109,7 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    | a new line inside a paragraph | a new line on the page, as in Obsidian |
    | a code block labelled with a language (`python`, `r`, ...) | coloured code with that label in its corner |
    | a code block labelled `mermaid` | a diagram, drawn in the browser (`src/scripts/site.ts`) in the site's colours |
+   | a `mermaid` box whose label is the title of a folded callout (`> [!note]- Title`) in the same note | a button: clicking the box opens that callout as a card under it, and the boxes and arrows below move down to make room; several can be open at once (`linkDetails` in `src/scripts/site.ts`) |
    | `==text==` | highlighted text |
    | `*text*` | italics one step heavier than the text (weight 500), so a defined term stands out; bold stays stronger (700), and italics inside bold stay bold |
    | `> [!note] Title` | a callout card; `[!note]-` starts folded |

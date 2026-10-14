@@ -288,6 +288,7 @@ async function drawDiagrams() {
   mermaid.initialize({
     startOnLoad: false,
     theme: 'base',
+    flowchart: { wrappingWidth: 260 }, // a box keeps a label of a few words on one line
     themeVariables: {
       darkMode: root.classList.contains('dark'),
       fontFamily: colour('--sans'),
@@ -311,11 +312,115 @@ async function drawDiagrams() {
       figure.dataset.source = source;
       figure.innerHTML = svg;
       block.replaceWith(figure);
+      linkDetails(figure);
     } catch {
       block.classList.add('failed'); // a diagram that cannot be drawn stays readable as text
     }
   }
 }
+
+/* 9. A diagram as a map. A box whose label is the title of a folded callout in the same note
+      becomes a button: clicking it opens that callout as a card under the box, and the diagram
+      makes room for it: every box and arrow below moves down by the card's height, and the
+      arrows that cross the gap stretch. Any number of cards can be open at once. Clicking the
+      box again (or the card's title) closes it. Without scripts the callouts stay in the page
+      below the diagram, folded. */
+const GAP = 10; // space between a box and its card, and between the card and what follows
+let refit = () => {}; // lays the open cards out again (the window changed width)
+
+function linkDetails(figure: HTMLElement) {
+  const prose = figure.closest<HTMLElement>('.prose');
+  const svg = figure.querySelector<SVGSVGElement>('svg');
+  if (!prose || !svg) return;
+  const details = new Map<string, HTMLDetailsElement>();
+  for (const detail of prose.querySelectorAll<HTMLDetailsElement>('details.callout')) {
+    const title = detail.querySelector('summary')?.textContent?.trim().toLowerCase();
+    if (title) details.set(title, detail);
+  }
+  // The diagram as it was drawn: where every box sits and the points of every arrow
+  const view = svg.getAttribute('viewBox') ?? '';
+  const [x, y, width, height] = view.split(/[\s,]+/).map(Number);
+  const moved = [...svg.querySelectorAll<SVGGElement>('g.node, g.edgeLabel, g.cluster')];
+  const arrows = [...svg.querySelectorAll<SVGPathElement>('.edgePaths path, path.flowchart-link')];
+  const places = moved.map((part) => part.getAttribute('transform') ?? '');
+  const lines = arrows.map((arrow) => arrow.getAttribute('d') ?? '');
+  const linked: { node: SVGGElement; detail: HTMLDetailsElement }[] = [];
+
+  // Draws the diagram for the cards that are open now
+  const layout = () => {
+    moved.forEach((part, i) => part.setAttribute('transform', places[i]));
+    arrows.forEach((arrow, i) => arrow.setAttribute('d', lines[i]));
+    svg.setAttribute('viewBox', view);
+    const frame = svg.getBoundingClientRect();
+    const top = prose.getBoundingClientRect().top;
+    const scale = frame.width / width; // screen pixels per diagram unit
+    // each open card: the line it opens under (the bottom of its box) and the room it needs
+    const open = linked
+      .filter(({ detail }) => detail.classList.contains('shown'))
+      .map(({ node, detail }) => {
+        const box = node.getBoundingClientRect();
+        return { detail, edge: box.bottom, left: box.left, room: detail.offsetHeight + 2 * GAP };
+      })
+      .sort((a, b) => a.edge - b.edge || a.left - b.left);
+    for (const { node, detail } of linked) {
+      node.classList.toggle('current', detail.classList.contains('shown'));
+    }
+    const roomAbove = (line: number) =>
+      open.reduce((sum, card) => (card.edge < line ? sum + card.room : sum), 0);
+    const shifts = moved.map((part) => {
+      const box = part.getBoundingClientRect();
+      return roomAbove(box.top + box.height / 2);
+    });
+    moved.forEach((part, i) => {
+      if (shifts[i]) part.setAttribute('transform', `translate(0,${shifts[i] / scale}) ${places[i]}`);
+    });
+    // an arrow is a list of x,y points: each point moves down with the boxes at its height
+    arrows.forEach((arrow, i) => {
+      const stretched = lines[i].replace(/(-?[\d.]+)[ ,](-?[\d.]+)/g, (point, px, py) => {
+        const shift = roomAbove(frame.top + (Number(py) - y) * scale - 0.5);
+        return shift ? `${px},${Number(py) + shift / scale}` : point;
+      });
+      arrow.setAttribute('d', stretched);
+    });
+    // cards go in order down the page; two boxes on one row stack their cards
+    let used = 0;
+    for (const card of open) {
+      card.detail.style.top = `${card.edge - top + used + GAP}px`;
+      used += card.room;
+    }
+    svg.setAttribute('viewBox', `${x} ${y} ${width} ${height + used / scale}`);
+  };
+
+  for (const node of svg.querySelectorAll<SVGGElement>('g.node')) {
+    const detail = details.get(node.textContent?.trim().toLowerCase() ?? '');
+    if (!detail) continue;
+    linked.push({ node, detail });
+    const toggle = () => {
+      detail.open = detail.classList.toggle('shown');
+      layout();
+    };
+    node.classList.add('has-detail');
+    node.setAttribute('role', 'button');
+    node.setAttribute('tabindex', '0');
+    node.addEventListener('click', toggle);
+    node.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      toggle();
+    });
+    detail.classList.add('map-detail');
+    // closing a card by its own title closes its gap too
+    detail.ontoggle = () => {
+      if (detail.open || !detail.classList.contains('shown')) return;
+      detail.classList.remove('shown');
+      layout();
+    };
+  }
+  refit = layout;
+  layout(); // a redraw (light / dark) starts from a fresh drawing: open cards go back in
+}
+
+window.addEventListener('resize', () => refit());
 
 // Runs on the first load and after every page change
 document.addEventListener('astro:page-load', () => {
