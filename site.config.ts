@@ -18,6 +18,9 @@ export interface Topic {
   subject?: string; // shown on its card; the heading the card sits under in "By topic"
   about?: string; // a line about the topic, shown first when its card is opened
   empty?: string; // line shown inside a topic that has no notes yet
+  // headings inside an opened card: each starts at the note whose series order is `from`;
+  // notes before the first heading stay ungrouped
+  sections?: { title: string; from: number }[];
 }
 
 export const site = {
@@ -66,6 +69,10 @@ export const topics: Topic[] = [
     subject: 'Economics',
     about: 'Learning from The Economics of Money, Banking, and Financial Markets, by Frederic S. Mishkin.',
     empty: 'Chapter notes will be listed here.',
+    sections: [
+      { title: 'Financial Markets', from: 3 },
+      { title: 'Fed and Monetary Policy', from: 7 },
+    ],
   },
   { id: 'ai-industry', title: 'AI Industry', subject: 'Industry' },
   { id: 'oil-markets', title: 'Oil markets', subject: 'Markets' },

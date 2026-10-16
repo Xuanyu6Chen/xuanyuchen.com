@@ -10,6 +10,13 @@ const { card } = Astro.props;
 
 const count = (n: number) => `${n} ${n === 1 ? 'note' : 'notes'}`;
 const first = card.about ? 1 : 0; // the notes come after the line about the topic
+
+// Notes and section headings in one list, so each row gets its place in the unfolding
+const sectionAt = (note: Note) => card.sections?.find((s) => s.from === note.data.series?.order);
+const rows = card.notes.flatMap((note) => {
+  const section = sectionAt(note);
+  return section ? [{ heading: section.title }, { note }] : [{ note }];
+});
 ---
 
 <div class="topic" data-rv>
@@ -35,11 +42,17 @@ const first = card.about ? 1 : 0; // the notes come after the line about the top
         )
       }
       {
-        card.notes.map((note, i) => (
-          <li style={`--i:${i + first}`}>
-            <a href={noteUrl(note)}>{note.data.title}</a>
-          </li>
-        ))
+        rows.map((row, i) =>
+          'heading' in row ? (
+            <li class="sect" style={`--i:${i + first}`}>
+              <span>{row.heading}</span>
+            </li>
+          ) : (
+            <li style={`--i:${i + first}`}>
+              <a href={noteUrl(row.note)}>{row.note.data.title}</a>
+            </li>
+          ),
+        )
       }
       {
         card.notes.length === 0 && (

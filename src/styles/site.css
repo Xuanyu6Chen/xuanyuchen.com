@@ -687,6 +687,15 @@ html[data-nv='date'] .notes > .topics {
 .topic.open .fold li.about {
   opacity: 0.7;
 }
+/* a section heading inside an opened card: small, above the notes it groups */
+.fold li.sect > * {
+  padding: 18px 0 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.topic.open .fold li.sect {
+  opacity: 0.6;
+}
 
 /* By date: one list, newest first; a row turns black under the pointer, like a topic card */
 .yr + .yr {

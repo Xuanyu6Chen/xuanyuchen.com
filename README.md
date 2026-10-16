@@ -98,7 +98,9 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    `![What it shows](/images/<topic>/file.png)`. A line of italics directly under a picture
    becomes its caption.
 3. A new topic is one line in `topics` in `site.config.ts`; its `subject` is shown on its
-   card and is the heading the card sits under in "By topic", and `about` is a line shown first when the card is opened. A note whose topic is not listed
+   card and is the heading the card sits under in "By topic", and `about` is a line shown first when the card is opened. `sections` (optional) puts
+   small headings inside the opened card, each starting at a note's `order`; notes before the first
+   heading stay ungrouped. A note whose topic is not listed
    there shows under "Other notes".
 
 4. Beyond standard Markdown, a note may use what Obsidian writes (`src/lib/markdown.mjs`):
