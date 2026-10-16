@@ -698,7 +698,8 @@ html[data-nv='date'] .notes > .topics {
   padding: 11px 0;
   cursor: pointer;
   list-style: none;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
 }
 .fold li.sect summary::-webkit-details-marker {
   display: none;
