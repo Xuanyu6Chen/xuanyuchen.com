@@ -18,8 +18,8 @@ export interface Topic {
   subject?: string; // shown on its card; the heading the card sits under in "By topic"
   about?: string; // a line about the topic, shown first when its card is opened
   empty?: string; // line shown inside a topic that has no notes yet
-  // headings inside an opened card: each starts at the note whose series order is `from`;
-  // notes before the first heading stay ungrouped
+  // folds inside an opened card, each opening and closing on its own: a section starts at the
+  // note whose series order is `from`; notes before the first section stay loose
   sections?: { title: string; from: number }[];
 }
 

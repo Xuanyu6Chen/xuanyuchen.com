@@ -11,12 +11,17 @@ const { card } = Astro.props;
 const count = (n: number) => `${n} ${n === 1 ? 'note' : 'notes'}`;
 const first = card.about ? 1 : 0; // the notes come after the line about the topic
 
-// Notes and section headings in one list, so each row gets its place in the unfolding
-const sectionAt = (note: Note) => card.sections?.find((s) => s.from === note.data.series?.order);
-const rows = card.notes.flatMap((note) => {
-  const section = sectionAt(note);
-  return section ? [{ heading: section.title }, { note }] : [{ note }];
-});
+// Rows of the opened card: notes before the first section stay loose; each section is a fold
+// of its own (closed at first) holding the notes from its `from` up to the next section
+type Row = { note: Note } | { title: string; notes: Note[] };
+const rows: Row[] = [];
+for (const note of card.notes) {
+  const section = card.sections?.find((s) => s.from === note.data.series?.order);
+  const last = rows.at(-1);
+  if (section) rows.push({ title: section.title, notes: [note] });
+  else if (last && 'notes' in last) last.notes.push(note);
+  else rows.push({ note });
+}
 ---
 
 <div class="topic" data-rv>
@@ -43,9 +48,21 @@ const rows = card.notes.flatMap((note) => {
       }
       {
         rows.map((row, i) =>
-          'heading' in row ? (
+          'notes' in row ? (
             <li class="sect" style={`--i:${i + first}`}>
-              <span>{row.heading}</span>
+              <details>
+                <summary>
+                  <span>{row.title}</span>
+                  <span class="sect-n">{count(row.notes.length)}</span>
+                </summary>
+                <ul>
+                  {row.notes.map((note) => (
+                    <li style="--i:0">
+                      <a href={noteUrl(note)}>{note.data.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </li>
           ) : (
             <li style={`--i:${i + first}`}>

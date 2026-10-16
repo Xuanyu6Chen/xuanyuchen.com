@@ -687,14 +687,48 @@ html[data-nv='date'] .notes > .topics {
 .topic.open .fold li.about {
   opacity: 0.7;
 }
-/* a section heading inside an opened card: small, above the notes it groups */
-.fold li.sect > * {
-  padding: 18px 0 6px;
+/* a section inside an opened card: a row that folds its own notes open and closed */
+.fold li.sect > details {
+  padding: 0;
+}
+.fold li.sect summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 11px 0;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 500;
+}
+.fold li.sect summary::-webkit-details-marker {
+  display: none;
+}
+.fold li.sect summary::after {
+  content: '+';
+  margin-left: auto;
+  font-family: var(--mono);
+}
+.fold li.sect details[open] > summary::after {
+  content: '−';
+}
+.fold li.sect summary:hover > span:first-child {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sect-n {
   font-family: var(--mono);
   font-size: 12px;
-}
-.topic.open .fold li.sect {
   opacity: 0.6;
+}
+.fold li.sect ul {
+  padding: 0 0 0 16px;
+}
+.fold li.sect li:last-child > * {
+  padding-bottom: 11px;
+}
+.fold > ul > li.sect:last-child > details:not([open]) > summary,
+.fold > ul > li.sect:last-child li:last-child > * {
+  padding-bottom: 20px;
 }
 
 /* By date: one list, newest first; a row turns black under the pointer, like a topic card */
