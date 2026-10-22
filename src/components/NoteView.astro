@@ -6,6 +6,7 @@ import {
   getNotes,
   getTranslations,
   inlineHtml,
+  plainText,
   longDate,
   minutesToRead,
   notesIn,
@@ -43,7 +44,7 @@ const contents = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const meta = [longDate(note.data.pubDate), topic?.title, `${minutesToRead(shown)} min read`].filter(Boolean);
 ---
 
-<Page title={shown.data.title} description={shown.data.description} published={note.data.pubDate} lang={lang}>
+<Page title={shown.data.title} description={plainText(shown.data.description)} published={note.data.pubDate} lang={lang}>
   <a class="back" href="/posts/">
     <span aria-hidden="true">&larr;</span> Back to notes
   </a>
@@ -61,7 +62,7 @@ const meta = [longDate(note.data.pubDate), topic?.title, `${minutesToRead(shown)
           )}
         </div>
         <h1>{shown.data.title}</h1>
-        {shown.data.description && <p class="lead">{shown.data.description}</p>}
+        {shown.data.description && <p class="lead" set:html={inlineHtml(shown.data.description)} />}
       </header>
 
       {shown.data.intro && (

@@ -84,7 +84,7 @@ October 2026 (`/posts/2026-03-21-<name>/`), `/projects/` and `/about/`.
    ```yaml
    ---
    title: 'Oil Markets (3): Refining'
-   description: One sentence. Shown under the title, in search and in the feed.
+   description: One sentence. Shown under the title (*italics* and ==highlight== work there), and as plain text in search and the feed.
    pubDate: 2026-11-02
    series:            # optional: the topic this note belongs to
      id: oil-markets  #   a topic id from site.config.ts

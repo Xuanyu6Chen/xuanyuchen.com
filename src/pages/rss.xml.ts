@@ -2,7 +2,7 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { site } from '../../site.config';
-import { getNotes, noteUrl } from '../lib/content';
+import { getNotes, noteUrl, plainText } from '../lib/content';
 
 export async function GET(context: APIContext) {
   const notes = await getNotes();
@@ -12,7 +12,7 @@ export async function GET(context: APIContext) {
     site: context.site ?? site.url,
     items: notes.map((note) => ({
       title: note.data.title,
-      description: note.data.description,
+      description: plainText(note.data.description),
       pubDate: note.data.pubDate,
       link: noteUrl(note),
     })),

@@ -8,6 +8,11 @@ export function inlineHtml(text: string): string {
   return safe.replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*(.+?)\*/g, '<em>$1</em>');
 }
 
+/** The same line as plain text, for places that cannot show formatting (meta tags, search, the feed). */
+export function plainText(text: string): string {
+  return text.replace(/==(.+?)==/g, '$1').replace(/\*(.+?)\*/g, '$1');
+}
+
 export type Note = CollectionEntry<'notes'>;
 export type Translation = CollectionEntry<'notesZh'>;
 export type WorkEntry = CollectionEntry<'work'>;

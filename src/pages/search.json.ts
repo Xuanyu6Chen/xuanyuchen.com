@@ -1,5 +1,5 @@
 // The list the search box looks through: every note and piece of work, built once with the site.
-import { getNotes, getWork, noteUrl, topicOf, workUrl } from '../lib/content';
+import { getNotes, getWork, noteUrl, plainText, topicOf, workUrl } from '../lib/content';
 
 export async function GET() {
   const pieces = await getWork();
@@ -8,13 +8,13 @@ export async function GET() {
   const entries = [
     ...pieces.map(({ entry }) => ({
       title: entry.data.title,
-      text: entry.data.description,
+      text: plainText(entry.data.description),
       url: workUrl(entry),
       kind: 'Work',
     })),
     ...notes.map((note) => ({
       title: note.data.title,
-      text: note.data.description,
+      text: plainText(note.data.description),
       url: noteUrl(note),
       kind: topicOf(note)?.title ?? 'Note',
     })),

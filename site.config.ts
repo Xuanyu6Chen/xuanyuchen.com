@@ -72,6 +72,7 @@ export const topics: Topic[] = [
     sections: [
       { title: 'Financial Markets', from: 3 },
       { title: 'Fed and Monetary Policy', from: 7 },
+      { title: 'International Finance', from: 11 },
     ],
   },
   { id: 'ai-industry', title: 'AI Industry', subject: 'Industry' },
