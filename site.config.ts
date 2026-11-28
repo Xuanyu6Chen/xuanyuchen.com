@@ -74,6 +74,7 @@ export const topics: Topic[] = [
       { title: 'Fed and Monetary Policy', from: 7 },
       { title: 'International Finance', from: 11 },
       { title: 'Financial Institutions', from: 13 },
+      { title: 'Monetary Theory', from: 18 },
     ],
   },
   { id: 'ai-industry', title: 'AI Industry', subject: 'Industry' },
