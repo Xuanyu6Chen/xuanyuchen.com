@@ -19,13 +19,18 @@ export type WorkEntry = CollectionEntry<'work'>;
 
 /* ---------- Notes ---------- */
 
-/** Live notes, newest first. Drafts and future-dated notes show only while developing. */
+/** Live notes, newest first; same-day notes in one series put the later part first. Drafts and future-dated notes show only while developing. */
 export async function getNotes(): Promise<Note[]> {
   const all = await getCollection('notes');
   const live = import.meta.env.DEV
     ? all
     : all.filter((note) => !note.data.draft && note.data.pubDate <= new Date());
-  return live.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return live.sort((a, b) => {
+    const byDate = b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+    if (byDate !== 0) return byDate;
+    const sa = a.data.series, sb = b.data.series;
+    return sa && sb && sa.id === sb.id ? sb.order - sa.order : 0;
+  });
 }
 
 /** A note's address is its file name: content/notes/oil-basics.md is /posts/oil-basics/ */
