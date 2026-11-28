@@ -1,7 +1,7 @@
 ---
 title: 'Money and Banking (19): The IS Curve'
 description: 'From Frederic S. Mishkin, *The Economics of Money, Banking, and Financial Markets* — Chapter 20'
-pubDate: 2026-11-28
+pubDate: 2026-11-27
 series:
   id: money-and-banking
   order: 19
